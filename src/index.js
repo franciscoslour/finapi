@@ -16,6 +16,17 @@ function verifyIfCustomerExist(request, response, next) {
     return next();
 }
 
+function getBalance(statements) {
+    const balance = statements.reduce((acc, statement) => {
+        if (statement.type === "credit") {
+            return acc + statement.amount;
+        } else {
+            return acc - statement.amount;
+        }
+    }, 0);
+    return balance;
+}
+
 app.post("/account", (request, response) => {
     const { nif, name } = request.body;
     const customerAlreadyExist = customers.some((customer) => customer.nif === nif)
@@ -46,6 +57,22 @@ app.post("/deposit", verifyIfCustomerExist, (request, response) => {
         amount,
         created_At: new Date(),
         type: "credit"
+    }
+    customer.statement.push(operation);
+    return response.status(201).send();
+})
+
+app.post("/withdraw", verifyIfCustomerExist, (request, response) => {
+    const { amount } = request.body;
+    const { customer } = request;
+    const balance = getBalance(customer.statement);
+    if (balance < amount) {
+        return response.status(400).json({ error: "Insuficiente founds" })
+    }
+    const operation = {
+        amount,
+        created_At: new Date(),
+        type: "debit"
     }
     customer.statement.push(operation);
     return response.status(201).send();
