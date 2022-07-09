@@ -1,3 +1,4 @@
+const { response } = require('express');
 const express = require('express');
 const { v4: uuidV4 } = require('uuid')
 
@@ -35,5 +36,19 @@ app.get("/statement", verifyIfCustomerExist, (request, response) => {
     return response.json(customer.statement);
 })
 
+app.post("/deposit", verifyIfCustomerExist, (request, response) => {
+    const { description, amount } = request.body;
+
+    const { customer } = request;
+
+    const operation = {
+        description,
+        amount,
+        created_At: new Date(),
+        type: "credit"
+    }
+    customer.statement.push(operation);
+    return response.status(201).send();
+})
 
 app.listen(3333);
