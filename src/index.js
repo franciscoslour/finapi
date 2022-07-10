@@ -42,9 +42,30 @@ app.post("/account", (request, response) => {
     return response.status(201).json({ customers: customers });
 })
 
+app.get("/account", verifyIfCustomerExist, (request, response) => {
+    const { customer } = request;
+    return response.json(customer);
+})
+
+app.put("/account", verifyIfCustomerExist, (request, response) => {
+    const { customer } = request;
+    const { name } = request.body;
+    customer.name = name;
+    return response.status(201).json(customer);
+})
+
 app.get("/statement", verifyIfCustomerExist, (request, response) => {
     const { customer } = request;
     return response.json(customer.statement);
+})
+
+app.get("/statement/date", verifyIfCustomerExist, (request, response) => {
+    const { customer } = request;
+    const { date } = request.query;
+
+    const dateFormat = new Date(date + " 00:00");
+    const statements = customer.statement.filter(statement => statement.created_At.toDateString() === new Date(dateFormat).toDateString())
+    return response.json({ statements });
 })
 
 app.post("/deposit", verifyIfCustomerExist, (request, response) => {
