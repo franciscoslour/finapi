@@ -54,6 +54,18 @@ app.put("/account", verifyIfCustomerExist, (request, response) => {
     return response.status(201).json(customer);
 })
 
+app.delete("/account", verifyIfCustomerExist, (request, response) => {
+    const { customer } = request;
+    customers.splice(customer, 1);
+    return response.status(200).json(customers);
+})
+
+app.get("/balance", verifyIfCustomerExist, (request, response) => {
+    const { customer } = request;
+    const balance = getBalance(customer.statement);
+    return response.json(balance);
+})
+
 app.get("/statement", verifyIfCustomerExist, (request, response) => {
     const { customer } = request;
     return response.json(customer.statement);
